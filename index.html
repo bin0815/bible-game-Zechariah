@@ -5,37 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>撒迦利亞書翻牌對對樂</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f0f8ff; padding: 20px; }
-        .stats { font-size: 1.2rem; margin-bottom: 20px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; max-width: 800px; margin: 0 auto; }
-        .card { height: 120px; background-color: #4a90e2; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; border-radius: 10px; font-size: 0.9rem; transition: transform 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .card.flipped { background-color: white; color: #333; transform: rotateY(180deg); }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f0f8ff; padding: 20px; margin: 0; }
+        h1 { margin-bottom: 10px; color: #2c3e50; }
+        .menu { margin-bottom: 20px; }
+        .menu button { background-color: #7f8c8d; color: white; border: none; padding: 10px 20px; margin: 0 5px; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+        .menu button.active { background-color: #2980b9; font-weight: bold; }
+        .stats { font-size: 1.2rem; margin-bottom: 20px; font-weight: bold; color: #34495e; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; max-width: 900px; margin: 0 auto; padding: 10px; }
+        .card { height: 130px; background-color: #4a90e2; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; border-radius: 10px; font-size: 0.95rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; }
+        .card.flipped { background-color: white; color: #333; transform: none; } /* 修正字體反向問題 */
         .card.blue { border: 4px solid #4a90e2; }
         .card.orange { border: 4px solid #f39c12; }
-        .card .icon { font-size: 2rem; margin-bottom: 5px; }
+        .card .icon { font-size: 2.2rem; margin-bottom: 5px; }
         .card.matched { visibility: hidden; }
     </style>
 </head>
 <body>
+
     <h1>撒迦利亞書冒險挑戰</h1>
+    
+    <div class="menu">
+        <button id="btn-10" onclick="setDifficulty(10)">簡單 (10張)</button>
+        <button id="btn-20" onclick="setDifficulty(20)">中等 (20張)</button>
+        <button id="btn-30" onclick="setDifficulty(30)">挑戰 (30張)</button>
+    </div>
+
     <div class="stats">次數: <span id="moves">0</span> | 時間: <span id="timer">0</span>秒</div>
     <div class="grid" id="gameGrid"></div>
 
     <script>
-        const data = [
+        // 完整的 15 組資料庫 (共 30 張牌)
+        const allData = [
             { id: 1, text: "騎驢的王", icon: "👑", type: "blue" }, { id: 1, text: "謙卑和平的耶穌", icon: "🕊️", type: "orange" },
             { id: 2, text: "金燈臺", icon: "💡", type: "blue" }, { id: 2, text: "聖靈帶領的光", icon: "✨", type: "orange" },
             { id: 3, text: "保護的眼", icon: "👁️", type: "blue" }, { id: 3, text: "上帝的守護", icon: "🛡️", type: "orange" },
             { id: 4, text: "飛翔書卷", icon: "📜", type: "blue" }, { id: 4, text: "潔淨心裡的罪", icon: "🧹", type: "orange" },
-            { id: 5, text: "好牧人", icon: "🐑", type: "blue" }, { id: 5, text: "照顧祂的羊群", icon: "❤️", type: "orange" }
+            { id: 5, text: "好牧人", icon: "🐑", type: "blue" }, { id: 5, text: "照顧祂的羊群", icon: "❤️", type: "orange" },
+            { id: 6, text: "整理房間", icon: "🏠", type: "blue" }, { id: 6, text: "丟掉嫉妒吵架", icon: "🗑️", type: "orange" },
+            { id: 7, text: "公義天平", icon: "⚖️", type: "blue" }, { id: 7, text: "做事誠實公平", icon: "🤝", type: "orange" },
+            { id: 8, text: "閃耀冠冕", icon: "👑", type: "blue" }, { id: 8, text: "榮耀的勝利", icon: "🌟", type: "orange" },
+            { id: 9, text: "禱告的手", icon: "🙏", type: "blue" }, { id: 9, text: "跟上帝說悄悄話", icon: "💬", type: "orange" },
+            { id: 10, text: "愛鄰舍", icon: "🌍", type: "blue" }, { id: 10, text: "幫助有需要的人", icon: "🎁", type: "orange" },
+            { id: 11, text: "活水泉源", icon: "💧", type: "blue" }, { id: 11, text: "上帝給的生命", icon: "🌱", type: "orange" },
+            { id: 12, text: "堅固城牆", icon: "🧱", type: "blue" }, { id: 12, text: "平安的記號", icon: "🏳️", type: "orange" },
+            { id: 13, text: "清晨日光", icon: "🌅", type: "blue" }, { id: 13, text: "帶來希望每一天", icon: "🌻", type: "orange" },
+            { id: 14, text: "喜樂油", icon: "🏺", type: "blue" }, { id: 14, text: "用快樂代替悲傷", icon: "😊", type: "orange" },
+            { id: 15, text: "新耶路撒冷", icon: "🏰", type: "blue" }, { id: 15, text: "永遠跟上帝住", icon: "👼", type: "orange" }
         ];
-        
+
+        let currentCardCount = 10; // 預設 10 張
         let moves = 0, timer = 0, flippedCards = [], matchedCount = 0;
-        const grid = document.getElementById('gameGrid');
-        
+        let timerInterval = null;
+        let isChecking = false; // 防止連續點擊過快爆開
+
+        function setDifficulty(count) {
+            currentCardCount = count;
+            document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${count}`).classList.add('active');
+            initGame();
+        }
+
         function initGame() {
-            data.sort(() => Math.random() - 0.5);
-            data.forEach(item => {
+            // 清除計時器
+            clearInterval(timerInterval);
+            timer = 0;
+            moves = 0;
+            matchedCount = 0;
+            flippedCards = [];
+            isChecking = false;
+            document.getElementById('timer').innerText = timer;
+            document.getElementById('moves').innerText = moves;
+
+            // 啟動計時器
+            timerInterval = setInterval(() => { 
+                timer++; 
+                document.getElementById('timer').innerText = timer; 
+            }, 1000);
+
+            // 隨機選取對應數量的資料組
+            let selectedPairs = allData.slice(0, currentCardCount); // 因為資料是兩兩一組，10張=5組*2
+            // 複製出一份並洗牌
+            let gameData = [...selectedPairs].sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+
+            gameData.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'card';
                 div.innerHTML = `<span>?</span>`;
@@ -46,37 +101,54 @@
                 div.onclick = flip;
                 grid.appendChild(div);
             });
-            setInterval(() => { timer++; document.getElementById('timer').innerText = timer; }, 1000);
         }
 
         function flip() {
-            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
-                this.classList.add('flipped', this.dataset.type);
-                this.innerHTML = `<div class="icon">${this.dataset.icon}</div>${this.dataset.text}`;
-                flippedCards.push(this);
-                if (flippedCards.length === 2) {
-                    moves++;
-                    document.getElementById('moves').innerText = moves;
-                    checkMatch();
-                }
+            if (isChecking) return; // 正在比對時不能點
+            if (this.classList.contains('flipped') || this.classList.contains('matched')) return; // 已經翻開或消去的不能點
+
+            this.classList.add('flipped', this.dataset.type);
+            this.innerHTML = `<div class="icon">${this.dataset.icon}</div>${this.dataset.text}`;
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').innerText = moves;
+                checkMatch();
             }
         }
 
         function checkMatch() {
+            isChecking = true;
             const [c1, c2] = flippedCards;
+
             if (c1.dataset.id === c2.dataset.id) {
+                // 配對成功
                 matchedCount += 2;
                 flippedCards = [];
-                if (matchedCount === 20) alert("太棒了！你完成了挑戰！總共花費 " + timer + " 秒。");
+                isChecking = false;
+
+                if (matchedCount === currentCardCount) {
+                    clearInterval(timerInterval);
+                    setTimeout(() => {
+                        alert(`🎉 太棒了！挑戰成功！\n總共花費 ${timer} 秒，翻牌 ${moves} 次！`);
+                    }, 300);
+                }
             } else {
+                // 配對失敗，1秒後自動蓋回
                 setTimeout(() => {
-                    c1.classList.remove('flipped', 'blue', 'orange'); c1.innerHTML = '<span>?</span>';
-                    c2.classList.remove('flipped', 'blue', 'orange'); c2.innerHTML = '<span>?</span>';
+                    c1.classList.remove('flipped', 'blue', 'orange'); 
+                    c1.innerHTML = '<span>?</span>';
+                    c2.classList.remove('flipped', 'blue', 'orange'); 
+                    c2.innerHTML = '<span>?</span>';
                     flippedCards = [];
+                    isChecking = false;
                 }, 1000);
             }
         }
-        initGame();
+
+        // 預設載入時選中 10 張
+        setDifficulty(10);
     </script>
 </body>
 </html>
