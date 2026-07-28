@@ -36,10 +36,10 @@ HTML
             justify-content: center;
         }
         
-        /* 依據不同難易度動態調整排版：10張(5x2), 20張(5x4), 30張(6x5) */
-        .grid.mode-10 { grid-template-columns: repeat(5, minmax(0, 1fr)); } 
-        .grid.mode-20 { grid-template-columns: repeat(5, minmax(0, 1fr)); } 
-        .grid.mode-30 { grid-template-columns: repeat(6, minmax(0, 1fr)); } 
+        /* 嚴格對應張數的網格版面 */
+        .grid.mode-10 { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); } 
+        .grid.mode-20 { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); } 
+        .grid.mode-30 { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: repeat(5, minmax(0, 1fr)); } 
 
         .card { 
             background-color: #4a90e2; 
@@ -50,7 +50,7 @@ HTML
             align-items: center; 
             cursor: pointer; 
             border-radius: 8px; 
-            font-size: 0.85rem; 
+            font-size: 0.8rem; 
             font-weight: bold; 
             box-shadow: 0 3px 5px rgba(0,0,0,0.15); 
             user-select: none; 
@@ -60,7 +60,7 @@ HTML
         .card.flipped { background-color: white; color: #333; transform: none; }
         .card.blue { border: 3px solid #4a90e2; }
         .card.orange { border: 3px solid #f39c12; }
-        .card .icon { font-size: 1.8rem; margin-bottom: 2px; }
+        .card .icon { font-size: 1.6rem; margin-bottom: 2px; }
         .card.matched { visibility: hidden; }
     </style>
 </head>
@@ -78,23 +78,23 @@ HTML
     <div class="grid" id="gameGrid"></div>
 
     <script>
-        // 總共 15 組完整資料
-        const allPairs = [
-            { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "謙卑和平的耶穌", icon: "🕊️" } },
-            { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈帶領的光", icon: "✨" } },
-            { id: 3, blue: { text: "保護的眼", icon: "👁️" }, orange: { text: "上帝的守護", icon: "🛡️" } },
-            { id: 4, blue: { text: "飛翔書卷", icon: "📜" }, orange: { text: "潔淨心裡的罪", icon: "🧹" } },
-            { id: 5, blue: { text: "好牧人", icon: "🐑" }, orange: { text: "照顧祂的羊群", icon: "❤️" } },
-            { id: 6, blue: { text: "整理房間", icon: "🏠" }, orange: { text: "丟掉嫉妒吵架", icon: "🗑️" } },
-            { id: 7, blue: { text: "公義天平", icon: "⚖️" }, orange: { text: "做事誠實公平", icon: "🤝" } },
-            { id: 8, blue: { text: "閃耀冠冕", icon: "👑" }, orange: { text: "榮耀的勝利", icon: "🌟" } },
-            { id: 9, blue: { text: "禱告的手", icon: "🙏" }, orange: { text: "跟上帝說悄悄話", icon: "💬" } },
-            { id: 10, blue: { text: "愛鄰舍", icon: "🌍" }, orange: { text: "幫助有需要的人", icon: "🎁" } },
-            { id: 11, blue: { text: "活水泉源", icon: "💧" }, orange: { text: "上帝給的生命", icon: "🌱" } },
-            { id: 12, blue: { text: "堅固城牆", icon: "🧱" }, orange: { text: "平安的記號", icon: "🏳️" } },
-            { id: 13, blue: { text: "清晨日光", icon: "🌅" }, orange: { text: "帶來希望每一天", icon: "🌻" } },
-            { id: 14, blue: { text: "喜樂油", icon: "🏺" }, orange: { text: "用快樂代替悲傷", icon: "😊" } },
-            { id: 15, blue: { text: "新耶路撒冷", icon: "🏰" }, orange: { text: "永遠跟上帝住", icon: "👼" } }
+        // 定義完整的 15 組配對資料庫
+        const masterPairs = [
+            { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "和平耶穌", icon: "🕊️" } },
+            { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈的光", icon: "✨" } },
+            { id: 3, blue: { text: "保護的眼", icon: "👁️" }, orange: { text: "上帝守護", icon: "🛡️" } },
+            { id: 4, blue: { text: "飛翔書卷", icon: "📜" }, orange: { text: "潔淨罪惡", icon: "🧹" } },
+            { id: 5, blue: { text: "好牧人", icon: "🐑" }, orange: { text: "照顧羊群", icon: "❤️" } },
+            { id: 6, blue: { text: "整理房間", icon: "🏠" }, orange: { text: "丟掉吵架", icon: "🗑️" } },
+            { id: 7, blue: { text: "公義天平", icon: "⚖️" }, orange: { text: "誠實公平", icon: "🤝" } },
+            { id: 8, blue: { text: "閃耀冠冕", icon: "👑" }, orange: { text: "榮耀勝利", icon: "🌟" } },
+            { id: 9, blue: { text: "禱告的手", icon: "🙏" }, orange: { text: "悄悄話", icon: "💬" } },
+            { id: 10, blue: { text: "愛鄰舍", icon: "🌍" }, orange: { text: "幫助別人", icon: "🎁" } },
+            { id: 11, blue: { text: "活水泉源", icon: "💧" }, orange: { text: "上帝生命", icon: "🌱" } },
+            { id: 12, blue: { text: "堅固城牆", icon: "🧱" }, orange: { text: "平安記號", icon: "🏳️" } },
+            { id: 13, blue: { text: "清晨日光", icon: "🌅" }, orange: { text: "帶來希望", icon: "🌻" } },
+            { id: 14, blue: { text: "喜樂油", icon: "🏺" }, orange: { text: "代替悲傷", icon: "😊" } },
+            { id: 15, blue: { text: "新耶路撒冷", icon: "🏰" }, orange: { text: "永遠同住", icon: "👼" } }
         ];
 
         let currentCardCount = 10;
@@ -124,20 +124,21 @@ HTML
                 document.getElementById('timer').innerText = timer; 
             }, 1000);
 
-            // 嚴格計算：10張=取5組，20張=取10組，30張=取15組
-            let pairCount = currentCardCount / 2;
-            let selectedPairs = allPairs.slice(0, pairCount);
-            
+            // 1. 決定要幾組（10張=5組, 20張=10組, 30張=15組）
+            let neededPairs = currentCardCount / 2;
+            let activePairs = masterPairs.slice(0, neededPairs);
+
+            // 2. 把每一組的「藍卡」與「橘卡」確實建立並推入遊戲陣列中
             let gameData = [];
-            selectedPairs.forEach(pair => {
-                // 每組強制放入一張藍卡、一張橘卡，確保一定找得到對應
+            activePairs.forEach(pair => {
                 gameData.push({ id: pair.id, text: pair.blue.text, icon: pair.blue.icon, type: "blue" });
                 gameData.push({ id: pair.id, text: pair.orange.text, icon: pair.orange.icon, type: "orange" });
             });
 
-            // 隨機洗牌
+            // 3. 隨機洗牌
             gameData.sort(() => Math.random() - 0.5);
 
+            // 4. 渲染到畫面上
             const grid = document.getElementById('gameGrid');
             grid.className = `grid mode-${currentCardCount}`;
             grid.innerHTML = '';
@@ -174,8 +175,8 @@ HTML
             isChecking = true;
             const [c1, c2] = flippedCards;
 
-            // 必須 ID 相同，且一張是藍卡、一張是橘卡才算成功配對
-            if (c1.dataset.id === c2.dataset.id && c1.dataset.type !== c2.dataset.type) {
+            // 只要兩張牌的 id 相同，就代表成功配對！
+            if (c1.dataset.id === c2.dataset.id) {
                 c1.classList.add('matched');
                 c2.classList.add('matched');
                 matchedCount += 2;
@@ -189,7 +190,7 @@ HTML
                     }, 300);
                 }
             } else {
-                // 配對失敗，1秒後自動蓋回
+                // 配對失敗，1秒後自動蓋回問號
                 setTimeout(() => {
                     c1.classList.remove('flipped', 'blue', 'orange'); 
                     c1.innerHTML = '<span>?</span>';
