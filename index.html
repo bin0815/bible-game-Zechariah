@@ -5,18 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>撒迦利亞書翻牌對對樂</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f0f8ff; padding: 20px; margin: 0; }
-        h1 { margin-bottom: 10px; color: #2c3e50; }
-        .menu { margin-bottom: 20px; }
-        .menu button { background-color: #7f8c8d; color: white; border: none; padding: 10px 20px; margin: 0 5px; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            text-align: center; 
+            background-color: #f0f8ff; 
+            margin: 0; 
+            padding: 10px; 
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* 鎖定畫面，避免平板或電腦出現捲軸 */
+        }
+        h1 { margin: 5px 0; color: #2c3e50; font-size: 1.5rem; }
+        .menu { margin-bottom: 8px; }
+        .menu button { background-color: #7f8c8d; color: white; border: none; padding: 6px 15px; margin: 0 4px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
         .menu button.active { background-color: #2980b9; font-weight: bold; }
-        .stats { font-size: 1.2rem; margin-bottom: 20px; font-weight: bold; color: #34495e; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; max-width: 900px; margin: 0 auto; padding: 10px; }
-        .card { height: 130px; background-color: #4a90e2; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; border-radius: 10px; font-size: 0.95rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); user-select: none; }
-        .card.flipped { background-color: white; color: #333; transform: none; } /* 修正字體反向問題 */
-        .card.blue { border: 4px solid #4a90e2; }
-        .card.orange { border: 4px solid #f39c12; }
-        .card .icon { font-size: 2.2rem; margin-bottom: 5px; }
+        .stats { font-size: 1rem; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+        
+        /* 網格自適應：確保無論 10、20、30 張都能完美塞在同一畫面 */
+        .grid { 
+            display: grid; 
+            gap: 8px; 
+            max-width: 950px; 
+            width: 100%;
+            margin: 0 auto; 
+            flex-grow: 1;
+            padding-bottom: 10px;
+            align-content: center;
+            justify-content: center;
+        }
+        
+        /* 依據不同難易度動態調整排版與卡片大小 */
+        .grid.mode-10 { grid-template-columns: repeat(5, minmax(0, 1fr)); } /* 5x2 */
+        .grid.mode-20 { grid-template-columns: repeat(5, minmax(0, 1fr)); } /* 5x4 */
+        .grid.mode-30 { grid-template-columns: repeat(6, minmax(0, 1fr)); } /* 6x5 */
+
+        .card { 
+            background-color: #4a90e2; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+            font-weight: bold; 
+            box-shadow: 0 3px 5px rgba(0,0,0,0.15); 
+            user-select: none; 
+            aspect-ratio: 1; /* 保持正方形卡片 */
+            padding: 4px;
+        }
+        .card.flipped { background-color: white; color: #333; transform: none; }
+        .card.blue { border: 3px solid #4a90e2; }
+        .card.orange { border: 3px solid #f39c12; }
+        .card .icon { font-size: 1.8rem; margin-bottom: 2px; }
         .card.matched { visibility: hidden; }
     </style>
 </head>
@@ -34,29 +78,28 @@
     <div class="grid" id="gameGrid"></div>
 
     <script>
-        // 完整的 15 組資料庫 (共 30 張牌)
-        const allData = [
-            { id: 1, text: "騎驢的王", icon: "👑", type: "blue" }, { id: 1, text: "謙卑和平的耶穌", icon: "🕊️", type: "orange" },
-            { id: 2, text: "金燈臺", icon: "💡", type: "blue" }, { id: 2, text: "聖靈帶領的光", icon: "✨", type: "orange" },
-            { id: 3, text: "保護的眼", icon: "👁️", type: "blue" }, { id: 3, text: "上帝的守護", icon: "🛡️", type: "orange" },
-            { id: 4, text: "飛翔書卷", icon: "📜", type: "blue" }, { id: 4, text: "潔淨心裡的罪", icon: "🧹", type: "orange" },
-            { id: 5, text: "好牧人", icon: "🐑", type: "blue" }, { id: 5, text: "照顧祂的羊群", icon: "❤️", type: "orange" },
-            { id: 6, text: "整理房間", icon: "🏠", type: "blue" }, { id: 6, text: "丟掉嫉妒吵架", icon: "🗑️", type: "orange" },
-            { id: 7, text: "公義天平", icon: "⚖️", type: "blue" }, { id: 7, text: "做事誠實公平", icon: "🤝", type: "orange" },
-            { id: 8, text: "閃耀冠冕", icon: "👑", type: "blue" }, { id: 8, text: "榮耀的勝利", icon: "🌟", type: "orange" },
-            { id: 9, text: "禱告的手", icon: "🙏", type: "blue" }, { id: 9, text: "跟上帝說悄悄話", icon: "💬", type: "orange" },
-            { id: 10, text: "愛鄰舍", icon: "🌍", type: "blue" }, { id: 10, text: "幫助有需要的人", icon: "🎁", type: "orange" },
-            { id: 11, text: "活水泉源", icon: "💧", type: "blue" }, { id: 11, text: "上帝給的生命", icon: "🌱", type: "orange" },
-            { id: 12, text: "堅固城牆", icon: "🧱", type: "blue" }, { id: 12, text: "平安的記號", icon: "🏳️", type: "orange" },
-            { id: 13, text: "清晨日光", icon: "🌅", type: "blue" }, { id: 13, text: "帶來希望每一天", icon: "🌻", type: "orange" },
-            { id: 14, text: "喜樂油", icon: "🏺", type: "blue" }, { id: 14, text: "用快樂代替悲傷", icon: "😊", type: "orange" },
-            { id: 15, text: "新耶路撒冷", icon: "🏰", type: "blue" }, { id: 15, text: "永遠跟上帝住", icon: "👼", type: "orange" }
+        const allPairs = [
+            { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "謙卑和平的耶穌", icon: "🕊️" } },
+            { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈帶領的光", icon: "✨" } },
+            { id: 3, blue: { text: "保護的眼", icon: "👁️" }, orange: { text: "上帝的守護", icon: "🛡️" } },
+            { id: 4, blue: { text: "飛翔書卷", icon: "📜" }, orange: { text: "潔淨心裡的罪", icon: "🧹" } },
+            { id: 5, blue: { text: "好牧人", icon: "🐑" }, orange: { text: "照顧祂的羊群", icon: "❤️" } },
+            { id: 6, blue: { text: "整理房間", icon: "🏠" }, orange: { text: "丟掉嫉妒吵架", icon: "🗑️" } },
+            { id: 7, blue: { text: "公義天平", icon: "⚖️" }, orange: { text: "做事誠實公平", icon: "🤝" } },
+            { id: 8, blue: { text: "閃耀冠冕", icon: "👑" }, orange: { text: "榮耀的勝利", icon: "🌟" } },
+            { id: 9, blue: { text: "禱告的手", icon: "🙏" }, orange: { text: "跟上帝說悄悄話", icon: "💬" } },
+            { id: 10, blue: { text: "愛鄰舍", icon: "🌍" }, orange: { text: "幫助有需要的人", icon: "🎁" } },
+            { id: 11, blue: { text: "活水泉源", icon: "💧" }, orange: { text: "上帝給的生命", icon: "🌱" } },
+            { id: 12, blue: { text: "堅固城牆", icon: "🧱" }, orange: { text: "平安的記號", icon: "🏳️" } },
+            { id: 13, blue: { text: "清晨日光", icon: "🌅" }, orange: { text: "帶來希望每一天", icon: "🌻" } },
+            { id: 14, blue: { text: "喜樂油", icon: "🏺" }, orange: { text: "用快樂代替悲傷", icon: "😊" } },
+            { id: 15, blue: { text: "新耶路撒冷", icon: "🏰" }, orange: { text: "永遠跟上帝住", icon: "👼" } }
         ];
 
-        let currentCardCount = 10; // 預設 10 張
+        let currentCardCount = 10;
         let moves = 0, timer = 0, flippedCards = [], matchedCount = 0;
         let timerInterval = null;
-        let isChecking = false; // 防止連續點擊過快爆開
+        let isChecking = false;
 
         function setDifficulty(count) {
             currentCardCount = count;
@@ -66,7 +109,6 @@
         }
 
         function initGame() {
-            // 清除計時器
             clearInterval(timerInterval);
             timer = 0;
             moves = 0;
@@ -76,18 +118,26 @@
             document.getElementById('timer').innerText = timer;
             document.getElementById('moves').innerText = moves;
 
-            // 啟動計時器
             timerInterval = setInterval(() => { 
                 timer++; 
                 document.getElementById('timer').innerText = timer; 
             }, 1000);
 
-            // 隨機選取對應數量的資料組
-            let selectedPairs = allData.slice(0, currentCardCount); // 因為資料是兩兩一組，10張=5組*2
-            // 複製出一份並洗牌
-            let gameData = [...selectedPairs].sort(() => Math.random() - 0.5);
+            // 決定要取幾組（例如 10 張 = 5 組，每組包含一張藍卡與一張橘卡）
+            let pairCount = currentCardCount / 2;
+            let selectedPairs = allPairs.slice(0, pairCount);
+            
+            let gameData = [];
+            selectedPairs.forEach(pair => {
+                gameData.push({ id: pair.id, text: pair.blue.text, icon: pair.blue.icon, type: "blue" });
+                gameData.push({ id: pair.id, text: pair.orange.text, icon: pair.orange.icon, type: "orange" });
+            });
+
+            // 洗牌
+            gameData.sort(() => Math.random() - 0.5);
 
             const grid = document.getElementById('gameGrid');
+            grid.className = `grid mode-${currentCardCount}`; // 動態切換網格排版樣式
             grid.innerHTML = '';
 
             gameData.forEach(item => {
@@ -104,8 +154,8 @@
         }
 
         function flip() {
-            if (isChecking) return; // 正在比對時不能點
-            if (this.classList.contains('flipped') || this.classList.contains('matched')) return; // 已經翻開或消去的不能點
+            if (isChecking) return; 
+            if (this.classList.contains('flipped') || this.classList.contains('matched')) return; 
 
             this.classList.add('flipped', this.dataset.type);
             this.innerHTML = `<div class="icon">${this.dataset.icon}</div>${this.dataset.text}`;
@@ -122,8 +172,8 @@
             isChecking = true;
             const [c1, c2] = flippedCards;
 
-            if (c1.dataset.id === c2.dataset.id) {
-                // 配對成功
+            if (c1.dataset.id === c2.dataset.id && c1.dataset.type !== c2.dataset.type) {
+                // 正確配對：必須 id 相同，且一張是藍卡、一張是橘卡
                 matchedCount += 2;
                 flippedCards = [];
                 isChecking = false;
@@ -135,7 +185,7 @@
                     }, 300);
                 }
             } else {
-                // 配對失敗，1秒後自動蓋回
+                // 配對失敗或同色相撞，1秒後自動蓋回
                 setTimeout(() => {
                     c1.classList.remove('flipped', 'blue', 'orange'); 
                     c1.innerHTML = '<span>?</span>';
@@ -147,7 +197,6 @@
             }
         }
 
-        // 預設載入時選中 10 張
         setDifficulty(10);
     </script>
 </body>
