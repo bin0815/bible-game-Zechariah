@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>撒迦利亞書翻牌對對樂</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f0f8ff; padding: 20px; }
+        .stats { font-size: 1.2rem; margin-bottom: 20px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; max-width: 800px; margin: 0 auto; }
+        .card { height: 120px; background-color: #4a90e2; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; border-radius: 10px; font-size: 0.9rem; transition: transform 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card.flipped { background-color: white; color: #333; transform: rotateY(180deg); }
+        .card.blue { border: 4px solid #4a90e2; }
+        .card.orange { border: 4px solid #f39c12; }
+        .card .icon { font-size: 2rem; margin-bottom: 5px; }
+        .card.matched { visibility: hidden; }
+    </style>
+</head>
+<body>
+    <h1>撒迦利亞書冒險挑戰</h1>
+    <div class="stats">次數: <span id="moves">0</span> | 時間: <span id="timer">0</span>秒</div>
+    <div class="grid" id="gameGrid"></div>
+
+    <script>
+        const data = [
+            { id: 1, text: "騎驢的王", icon: "👑", type: "blue" }, { id: 1, text: "謙卑和平的耶穌", icon: "🕊️", type: "orange" },
+            { id: 2, text: "金燈臺", icon: "💡", type: "blue" }, { id: 2, text: "聖靈帶領的光", icon: "✨", type: "orange" },
+            { id: 3, text: "保護的眼", icon: "👁️", type: "blue" }, { id: 3, text: "上帝的守護", icon: "🛡️", type: "orange" },
+            { id: 4, text: "飛翔書卷", icon: "📜", type: "blue" }, { id: 4, text: "潔淨心裡的罪", icon: "🧹", type: "orange" },
+            { id: 5, text: "好牧人", icon: "🐑", type: "blue" }, { id: 5, text: "照顧祂的羊群", icon: "❤️", type: "orange" }
+        ];
+        
+        let moves = 0, timer = 0, flippedCards = [], matchedCount = 0;
+        const grid = document.getElementById('gameGrid');
+        
+        function initGame() {
+            data.sort(() => Math.random() - 0.5);
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `<span>?</span>`;
+                div.dataset.id = item.id;
+                div.dataset.text = item.text;
+                div.dataset.icon = item.icon;
+                div.dataset.type = item.type;
+                div.onclick = flip;
+                grid.appendChild(div);
+            });
+            setInterval(() => { timer++; document.getElementById('timer').innerText = timer; }, 1000);
+        }
+
+        function flip() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped', this.dataset.type);
+                this.innerHTML = `<div class="icon">${this.dataset.icon}</div>${this.dataset.text}`;
+                flippedCards.push(this);
+                if (flippedCards.length === 2) {
+                    moves++;
+                    document.getElementById('moves').innerText = moves;
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            if (c1.dataset.id === c2.dataset.id) {
+                matchedCount += 2;
+                flippedCards = [];
+                if (matchedCount === 20) alert("太棒了！你完成了挑戰！總共花費 " + timer + " 秒。");
+            } else {
+                setTimeout(() => {
+                    c1.classList.remove('flipped', 'blue', 'orange'); c1.innerHTML = '<span>?</span>';
+                    c2.classList.remove('flipped', 'blue', 'orange'); c2.innerHTML = '<span>?</span>';
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+        initGame();
+    </script>
+</body>
+</html>
