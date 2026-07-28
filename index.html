@@ -2,172 +2,233 @@
 <html lang="zh-TW">
 
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>撒迦利亞書翻牌對對樂</title>
+<title>
+撒迦利亞書下半部翻牌對對樂 V1.1
+</title>
+
 
 <style>
 
-*{
- box-sizing:border-box;
- font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
-}
-
 body{
- margin:0;
- background:linear-gradient(#bde7ff,#ffffff);
- text-align:center;
- color:#333;
+
+margin:0;
+
+font-family:
+"Noto Sans TC",
+"Microsoft JhengHei",
+sans-serif;
+
+background:
+linear-gradient(#cceeff,#fff);
+
+text-align:center;
+
+color:#444;
+
 }
 
 
 h1{
- color:#7b4b21;
- margin-top:20px;
+
+color:#754c24;
+
 }
 
 
-.menu{
- margin:20px;
-}
-
-
-button{
- padding:12px 25px;
- margin:8px;
- border:none;
- border-radius:20px;
- background:#f2b84b;
- font-size:18px;
- cursor:pointer;
-}
-
-
-button:hover{
- transform:scale(1.05);
-}
-
-
-.info{
+.menu button{
 
 font-size:20px;
-margin:15px;
 
-}
+padding:12px 25px;
 
+margin:10px;
 
-.game{
+border-radius:25px;
 
-display:grid;
-gap:12px;
-justify-content:center;
-padding:15px;
+border:none;
 
-}
+background:#f6c453;
 
-
-.card{
-
-width:100px;
-height:130px;
-perspective:800px;
 cursor:pointer;
 
 }
 
 
-.card-inner{
+.menu button:hover{
+
+transform:scale(1.05);
+
+}
+
+
+
+.info{
+
+font-size:20px;
+
+margin:15px;
+
+}
+
+
+
+.game{
+
+display:grid;
+
+gap:12px;
+
+justify-content:center;
+
+padding:20px;
+
+}
+
+
+
+.card{
+
+width:100px;
+
+height:130px;
+
+perspective:800px;
+
+cursor:pointer;
+
+}
+
+
+
+.inner{
+
+width:100%;
+
+height:100%;
 
 position:relative;
-width:100%;
-height:100%;
+
 transition:.5s;
+
 transform-style:preserve-3d;
 
 }
 
 
-.card.flip .card-inner{
+
+.card.flip .inner{
 
 transform:rotateY(180deg);
 
 }
+
 
 
 .front,
 .back{
 
 position:absolute;
+
 width:100%;
+
 height:100%;
-border-radius:15px;
+
+border-radius:18px;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
+
 backface-visibility:hidden;
+
+}
+
+
+
+.front{
+
+background:white;
+
+border:3px solid #d89b27;
+
 font-size:45px;
 
 }
 
 
-.front{
-
-background:#ffffff;
-border:3px solid #e2a23b;
-
-}
-
 
 .back{
 
-background:#ffe7a8;
+background:#ffe9a6;
+
 transform:rotateY(180deg);
+
 font-size:18px;
+
 padding:10px;
 
 }
 
 
-.card.done .back{
 
-background:#a8e6a1;
+.done .back{
+
+background:#b7e7b0;
 
 }
 
 
 
-#result{
+.story{
+
+display:none;
+
+position:fixed;
+
+left:50%;
+
+top:50%;
+
+transform:translate(-50%,-50%);
+
+background:white;
+
+padding:25px;
+
+width:80%;
+
+max-width:400px;
+
+border-radius:20px;
+
+box-shadow:0 0 20px #999;
+
+}
+
+
+
+.story h2{
+
+color:#b06b00;
+
+}
+
+
+
+.result{
 
 display:none;
 
 font-size:28px;
 
-background:white;
-
 padding:30px;
-
-border-radius:20px;
-
-margin:20px;
-
-}
-
-
-.fire{
-
-font-size:50px;
-
-animation:bounce 1s infinite;
-
-}
-
-
-@keyframes bounce{
-
-50%{
-transform:translateY(-15px);
-}
 
 }
 
@@ -178,13 +239,8 @@ transform:translateY(-15px);
 .card{
 
 width:75px;
+
 height:100px;
-
-}
-
-.front{
-
-font-size:35px;
 
 }
 
@@ -192,6 +248,7 @@ font-size:35px;
 
 
 </style>
+
 
 </head>
 
@@ -201,24 +258,29 @@ font-size:35px;
 
 <h1>
 📖 撒迦利亞書下半部<br>
-神應許的君王來了！
+👑 神應許的君王來了！
 </h1>
 
 
-<div class="menu" id="menu">
+
+<div class="menu">
+
 
 <button onclick="startGame(5)">
-🟢 簡單<br>10張卡
+🟢 簡單<br>
+10張
 </button>
 
 
 <button onclick="startGame(10)">
-🟡 中級<br>20張卡
+🟡 中級<br>
+20張
 </button>
 
 
 <button onclick="startGame(15)">
-🔴 困難<br>30張卡
+🔴 困難<br>
+30張
 </button>
 
 
@@ -228,29 +290,53 @@ font-size:35px;
 
 <div class="info">
 
-⏱ 時間：
-<span id="time">00:00</span>
+⏱
+<span id="time">
+00:00
+</span>
 
 <br>
 
 翻牌：
-<span id="moves">0</span> 次
+
+<span id="move">
+0
+</span>
+
+次
+
 
 </div>
 
 
 
-<div class="game" id="game"></div>
+<div id="game" class="game"></div>
 
 
-<div id="result">
 
-<div class="fire">
+<div id="story" class="story">
+
+<h2 id="storyTitle"></h2>
+
+<p id="storyText"></p>
+
+<p id="verse"></p>
+
+
+<button onclick="closeStory()">
+繼續遊戲
+</button>
+
+</div>
+
+
+
+<div id="result" class="result">
+
 🎉🎉🎉
-</div>
 
 <h2>
-恭喜完成！
+完成啦！
 </h2>
 
 
@@ -260,7 +346,7 @@ font-size:35px;
 
 
 <p>
-👑 耶穌愛你、保護你。
+👑 耶穌愛你，永遠陪伴你。
 </p>
 
 
@@ -273,179 +359,222 @@ font-size:35px;
 
 
 
+
 <script>
 
 
-const cardsData=[
+const bibleCards=[
 
 
 {
 icon:"🫏",
-text:"謙卑的君王來了"
+title:"謙卑的君王",
+text:"耶穌騎著驢子來到百姓中間，祂是一位愛人的君王。",
+verse:"撒迦利亞書 9:9"
 },
 
 
 {
 icon:"👑",
-text:"神應許的君王"
+title:"神應許的君王",
+text:"神答應要差派一位特別的君王，拯救祂的百姓。",
+verse:"撒迦利亞書 9章"
 },
 
 
 {
 icon:"🐑",
-text:"神像牧人照顧我們"
+title:"愛我們的牧人",
+text:"神像牧人照顧羊一樣，看顧祂的孩子。",
+verse:"撒迦利亞書 10章"
 },
 
 
 {
 icon:"❤️",
-text:"神沒有忘記祂的百姓"
+title:"神沒有忘記",
+text:"即使人遇到困難，神仍然記得祂的應許。",
+verse:"撒迦利亞書 9-10章"
 },
 
 
 {
 icon:"💧",
-text:"神賜下新的生命"
+title:"生命泉源",
+text:"神要潔淨我們，給我們新的生命。",
+verse:"撒迦利亞書 13:1"
 },
 
 
 {
 icon:"💰",
-text:"三十塊銀子"
+title:"三十塊銀子",
+text:"這預告耶穌後來被人出賣。",
+verse:"撒迦利亞書 11:12"
 },
 
 
 {
 icon:"✝️",
-text:"耶穌為我們受苦"
+title:"受傷的牧人",
+text:"耶穌為了愛我們，願意受苦。",
+verse:"撒迦利亞書 13:7"
 },
 
 
 {
 icon:"🛡️",
-text:"神保護祂的孩子"
+title:"神保護百姓",
+text:"神是我們的力量和保護。",
+verse:"撒迦利亞書 12章"
 },
 
 
 {
 icon:"☀️",
-text:"神帶來盼望"
+title:"神帶來盼望",
+text:"神讓黑暗變成光明。",
+verse:"撒迦利亞書 14章"
 },
 
 
 {
 icon:"🌎",
-text:"神作全地的王"
-},
-
-
-{
-icon:"⛲",
-text:"罪得潔淨"
-},
-
-
-{
-icon:"🔥",
-text:"神煉淨我們"
-},
-
-
-{
-icon:"🏰",
-text:"神保護耶路撒冷"
-},
-
-
-{
-icon:"📖",
-text:"神的應許"
-},
-
-
-{
-icon:"👑✝️",
-text:"耶穌永遠作王"
+title:"神掌管全世界",
+text:"最後所有人都知道神是真正的王。",
+verse:"撒迦利亞書 14:9"
 }
 
 
 ];
 
+let firstCard = null;
+let secondCard = null;
 
+let lockBoard = false;
 
-let first=null;
-let second=null;
-let lock=false;
+let moves = 0;
 
-let total=0;
-let matched=0;
+let matched = 0;
 
-let moves=0;
+let totalCards = 0;
 
-let seconds=0;
+let seconds = 0;
 
 let timer;
 
 
 
-function startGame(number){
+// 開始遊戲
+
+function startGame(level){
 
 
-document.getElementById("menu").style.display="none";
+document.querySelector(".menu").style.display="none";
 
 
-let selected=cardsData.slice(0,number);
+let selectedCards =
+bibleCards.slice(0,level);
 
 
 
-let cards=[];
+let gameCards=[];
 
 
-selected.forEach((item,index)=>{
+
+selectedCards.forEach((item,index)=>{
 
 
-cards.push({
+// 圖片卡
+
+gameCards.push({
+
 id:index,
-show:item.icon
+
+content:item.icon,
+
+type:"image",
+
+data:item
+
 });
 
 
-cards.push({
+
+// 故事卡
+
+gameCards.push({
+
 id:index,
-show:item.text
+
+content:item.title,
+
+type:"text",
+
+data:item
+
 });
 
 
 });
 
 
-cards.sort(()=>Math.random()-0.5);
+
+// 隨機排列
+
+gameCards.sort(()=>Math.random()-0.5);
 
 
 
-total=cards.length;
+totalCards=gameCards.length;
 
-const game=document.getElementById("game");
+
+
+createCards(gameCards);
+
+
+
+startTimer();
+
+
+
+}
+
+
+
+// 建立卡片
+
+function createCards(cards){
+
+
+const game =
+document.getElementById("game");
+
 
 game.innerHTML="";
 
 
+
 game.style.gridTemplateColumns=
-`repeat(auto-fit,minmax(80px,100px))`;
+"repeat(auto-fit,minmax(80px,100px))";
 
 
 
 cards.forEach(card=>{
 
 
-let div=document.createElement("div");
+let div =
+document.createElement("div");
+
+
 
 div.className="card";
 
 
+
 div.innerHTML=`
 
-<div class="card-inner">
+<div class="inner">
 
 <div class="front">
 ❓
@@ -453,9 +582,10 @@ div.innerHTML=`
 
 
 <div class="back">
-${card.show}
-</div>
 
+${card.content}
+
+</div>
 
 </div>
 
@@ -463,7 +593,12 @@ ${card.show}
 
 
 
-div.onclick=()=>flip(div,card);
+div.onclick=function(){
+
+flipCard(div,card);
+
+};
+
 
 
 game.appendChild(div);
@@ -473,19 +608,135 @@ game.appendChild(div);
 });
 
 
-timer=setInterval(()=>{
+}
 
 
-seconds++;
 
-let m=Math.floor(seconds/60);
+// 翻牌
 
-let s=seconds%60;
+function flipCard(card,data){
 
 
-document.getElementById("time")
-.innerText=
-`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+
+if(lockBoard)
+return;
+
+
+if(card.classList.contains("flip"))
+return;
+
+
+card.classList.add("flip");
+
+
+
+if(!firstCard){
+
+
+firstCard={
+
+element:card,
+
+data:data
+
+};
+
+
+return;
+
+
+}
+
+
+
+secondCard={
+
+element:card,
+
+data:data
+
+};
+
+
+
+moves++;
+
+
+document.getElementById("move")
+.innerText=moves;
+
+
+
+checkMatch();
+
+
+
+}
+
+
+
+// 判斷是否配對
+
+function checkMatch(){
+
+
+
+if(firstCard.data.id === secondCard.data.id){
+
+
+
+playSound("success");
+
+
+
+firstCard.element.classList.add("done");
+
+secondCard.element.classList.add("done");
+
+
+
+matched+=2;
+
+
+
+showStory(firstCard.data.data);
+
+
+
+resetTurn();
+
+
+
+if(matched===totalCards){
+
+
+finishGame();
+
+
+}
+
+
+
+}
+
+else{
+
+
+playSound("wrong");
+
+
+lockBoard=true;
+
+
+
+setTimeout(()=>{
+
+
+firstCard.element.classList.remove("flip");
+
+secondCard.element.classList.remove("flip");
+
+resetTurn();
 
 
 
@@ -497,128 +748,47 @@ document.getElementById("time")
 
 
 
-function flip(card,info){
-
-
-if(lock)return;
-
-if(card.classList.contains("flip"))
-return;
-
-
-
-card.classList.add("flip");
-
-
-
-if(!first){
-
-first={
-card:card,
-id:info.id
-};
-
-return;
-
 }
 
 
 
-second={
-card:card,
-id:info.id
-};
 
 
-moves++;
+// 顯示故事
 
-document.getElementById("moves").innerText=moves;
+function showStory(data){
 
 
 
-check();
-
-
-}
-
-
-
-function check(){
-
-
-if(first.id===second.id){
-
-
-first.card.classList.add("done");
-
-second.card.classList.add("done");
-
-
-matched+=2;
-
-
-reset();
-
-
-if(matched===total){
-
-finish();
-
-}
+document.getElementById("storyTitle")
+.innerText=data.title;
 
 
 
-}else{
-
-
-lock=true;
-
-
-setTimeout(()=>{
-
-
-first.card.classList.remove("flip");
-
-second.card.classList.remove("flip");
-
-
-reset();
-
-
-},900);
+document.getElementById("storyText")
+.innerText=data.text;
 
 
 
-}
-
-
-}
-
-
-
-function reset(){
-
-first=null;
-
-second=null;
-
-lock=false;
-
-}
+document.getElementById("verse")
+.innerText="📖 "+data.verse;
 
 
 
-function finish(){
-
-
-clearInterval(timer);
-
-
-document.getElementById("result")
+document.getElementById("story")
 .style.display="block";
 
 
-document.getElementById("game")
+
+}
+
+
+
+
+function closeStory(){
+
+
+document.getElementById("story")
 .style.display="none";
 
 
@@ -626,9 +796,137 @@ document.getElementById("game")
 
 
 
-</script>
+// 重置翻牌
+
+function resetTurn(){
 
 
-</body>
+firstCard=null;
 
-</html>
+secondCard=null;
+
+lockBoard=false;
+
+
+}
+
+
+
+// 計時
+
+function startTimer(){
+
+
+seconds=0;
+
+
+timer=setInterval(()=>{
+
+
+seconds++;
+
+
+let min=
+Math.floor(seconds/60);
+
+
+
+let sec=
+seconds%60;
+
+
+
+document.getElementById("time")
+.innerText=
+
+String(min).padStart(2,"0")
++
+":"
++
+String(sec).padStart(2,"0");
+
+
+
+},1000);
+
+
+
+}
+
+
+
+// 完成遊戲
+
+function finishGame(){
+
+
+
+clearInterval(timer);
+
+
+
+setTimeout(()=>{
+
+
+document.getElementById("game")
+.style.display="none";
+
+
+document.querySelector(".info")
+.style.display="none";
+
+
+
+document.getElementById("result")
+.style.display="block";
+
+
+
+},800);
+
+
+
+}
+
+
+
+// 音效
+
+function playSound(type){
+
+
+
+let audio =
+new Audio();
+
+
+
+if(type==="success"){
+
+
+audio.src=
+"data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAA";
+
+
+}
+
+
+else{
+
+
+audio.src=
+"data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAA";
+
+
+}
+
+
+
+audio.play();
+
+
+
+}
+
+
+
