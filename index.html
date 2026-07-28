@@ -1,254 +1,399 @@
 HTML
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>撒迦利亞書翻牌對對樂</title>
+    <title>撒迦利亞書冒險挑戰</title>
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            text-align: center; 
-            background-color: #f0f8ff; 
-            margin: 0; 
-            padding: 10px; 
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-blue-hover: #2563eb;
+            --bg-color: #f0f7ff;
+            --text-color: #1e293b;
+            --card-back: #3b82f6;
+            --matched-bg: #d1fae5;
+            --matched-border: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
+            align-items: center;
             min-height: 100vh;
+            padding: 20px;
         }
-        h1 { margin: 5px 0; color: #2c3e50; font-size: 1.5rem; }
-        .menu { margin-bottom: 8px; }
-        .menu button { background-color: #7f8c8d; color: white; border: none; padding: 6px 15px; margin: 0 4px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-        .menu button.active { background-color: #2980b9; font-weight: bold; }
-        .stats { font-size: 1rem; margin-bottom: 12px; font-weight: bold; color: #34495e; }
-        
-        .grid { 
-            display: grid; 
-            gap: 8px; 
-            max-width: 950px; 
-            width: 100%;
-            margin: 0 auto; 
-            padding: 5px;
-            justify-content: center;
-        }
-        
-        .grid.mode-10 { grid-template-columns: repeat(5, minmax(70px, 120px)); } 
-        .grid.mode-20 { grid-template-columns: repeat(5, minmax(70px, 120px)); } 
-        .grid.mode-30 { grid-template-columns: repeat(6, minmax(60px, 110px)); } 
 
-        /* 卡片本體 */
-        .card { 
-            background-color: #4a90e2; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            box-shadow: 0 3px 5px rgba(0,0,0,0.15); 
-            user-select: none; 
-            aspect-ratio: 1; 
-            position: relative;
-        }
-        
-        /* 背面（問號） */
-        .card .card-back {
+        h1 {
             font-size: 2rem;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+            text-align: center;
+        }
+
+        /* 難度選擇按鈕 */
+        .controls {
             display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #8a9bb2;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn.active {
+            background-color: var(--primary-blue);
+        }
+
+        /* 遊戲統計資訊 */
+        .stats {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #334155;
+        }
+
+        /* 卡片網格排版 */
+        .game-board {
+            display: grid;
+            gap: 12px;
+            width: 100%;
+            max-width: 800px;
+            justify-content: center;
+        }
+
+        /* 根據難度動態調整行數 */
+        .grid-5 { grid-template-columns: repeat(5, 1fr); max-width: 600px; }
+        .grid-10 { grid-template-columns: repeat(5, 1fr); max-width: 650px; }
+        .grid-15 { grid-template-columns: repeat(6, 1fr); max-width: 800px; }
+
+        @media (max-width: 600px) {
+            .grid-5 { grid-template-columns: repeat(3, 1fr); }
+            .grid-10 { grid-template-columns: repeat(4, 1fr); }
+            .grid-15 { grid-template-columns: repeat(5, 1fr); }
+        }
+
+        /* 3D 卡片效果 */
+        .card {
+            aspect-ratio: 1 / 1;
+            background: transparent;
+            cursor: pointer;
+            perspective: 1000px;
+            user-select: none;
+        }
+
+        .card-inner {
+            position: relative;
             width: 100%;
             height: 100%;
+            text-align: center;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
         }
 
-        /* 正面（內容）預設隱藏 */
-        .card .card-front {
-            display: none;
+        /* 翻開與配對成功的狀態 */
+        .card.flipped .card-inner,
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            height: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+        }
+
+        /* 牌背 (藍色問號) */
+        .card-back {
+            background-color: var(--card-back);
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .card:hover:not(.flipped):not(.matched) .card-back {
+            background-color: var(--primary-blue-hover);
+        }
+
+        /* 牌面 (內容) */
+        .card-front {
             background-color: white;
             color: #333;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            padding: 2px;
+            transform: rotateY(180deg);
+            border: 2px solid #e2e8f0;
         }
 
-        /* 翻開後的狀態 */
-        .card.flipped .card-back { display: none; }
-        .card.flipped .card-front { display: flex; }
-        
-        .card.blue.flipped { border: 3px solid #4a90e2; }
-        .card.orange.flipped { border: 3px solid #f39c12; }
-        .card .icon { font-size: 1.5rem; margin-bottom: 2px; }
-        
-        /* 配對成功隱藏 */
-        .card.matched { visibility: hidden; opacity: 0; pointer-events: none; }
+        .card-front .icon {
+            font-size: 2rem;
+            margin-bottom: 4px;
+        }
+
+        .card-front .text {
+            font-size: 0.85rem;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+
+        /* 配對成功後的樣式 (保持保留在網格中，不消失！) */
+        .card.matched .card-front {
+            background-color: var(--matched-bg);
+            border: 3px solid var(--matched-border);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .card.matched {
+            cursor: default;
+        }
     </style>
 </head>
 <body>
 
     <h1>撒迦利亞書冒險挑戰</h1>
-    
-    <div class="menu">
-        <button id="btn-10" onclick="switchMode(10)">簡單 (5對)</button>
-        <button id="btn-20" onclick="switchMode(20)">中級 (10對)</button>
-        <button id="btn-30" onclick="switchMode(30)">高級 (15對)</button>
+
+    <div class="controls">
+        <button class="btn active" onclick="startGame(5, this)">簡單 (5對)</button>
+        <button class="btn" onclick="startGame(10, this)">中級 (10對)</button>
+        <button class="btn" onclick="startGame(15, this)">高級 (15對)</button>
     </div>
 
-    <div class="stats">次數: <span id="moves">0</span> | 時間: <span id="timer">0</span>秒</div>
-    <div class="grid" id="gameGrid"></div>
+    <div class="stats">
+        次數: <span id="moves-count">0</span> | 時間: <span id="timer">0</span>秒
+    </div>
+
+    <div id="game-board" class="game-board grid-5"></div>
 
     <script>
-        const gameModes = {
-            10: [
-                { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "和平耶穌", icon: "🕊️" } },
-                { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈的光", icon: "✨" } },
-                { id: 3, blue: { text: "保護的眼", icon: "👁️" }, orange: { text: "上帝守護", icon: "🛡️" } },
-                { id: 4, blue: { text: "飛翔書卷", icon: "📜" }, orange: { text: "潔淨罪惡", icon: "🧹" } },
-                { id: 5, blue: { text: "好牧人", icon: "🐑" }, orange: { text: "照顧羊群", icon: "❤️" } }
-            ],
-            20: [
-                { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "和平耶穌", icon: "🕊️" } },
-                { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈的光", icon: "✨" } },
-                { id: 3, blue: { text: "保護的眼", icon: "👁️" }, orange: { text: "上帝守護", icon: "🛡️" } },
-                { id: 4, blue: { text: "飛翔書卷", icon: "📜" }, orange: { text: "潔淨罪惡", icon: "🧹" } },
-                { id: 5, blue: { text: "好牧人", icon: "🐑" }, orange: { text: "照顧羊群", icon: "❤️" } },
-                { id: 6, blue: { text: "整理房間", icon: "🏠" }, orange: { text: "丟掉吵架", icon: "🗑️" } },
-                { id: 7, blue: { text: "公義天平", icon: "⚖️" }, orange: { text: "誠實公平", icon: "🤝" } },
-                { id: 8, blue: { text: "閃耀冠冕", icon: "👑" }, orange: { text: "榮耀勝利", icon: "🌟" } },
-                { id: 9, blue: { text: "禱告的手", icon: "🙏" }, orange: { text: "悄悄話", icon: "💬" } },
-                { id: 10, blue: { text: "愛鄰舍", icon: "🌍" }, orange: { text: "幫助別人", icon: "🎁" } }
-            ],
-            30: [
-                { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "和平耶穌", icon: "🕊️" } },
-                { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈的光", icon: "✨" } },
-                { id: 3, blue: { text: "保護的眼", icon: "👁️" }, orange: { text: "上帝守護", icon: "🛡️" } },
-                { id: 4, blue: { text: "飛翔書卷", icon: "📜" }, orange: { text: "潔淨罪惡", icon: "🧹" } },
-                { id: 5, blue: { text: "好牧人", icon: "🐑" }, orange: { text: "照顧羊群", icon: "❤️" } },
-                { id: 6, blue: { text: "整理房間", icon: "🏠" }, orange: { text: "丟掉吵架", icon: "🗑️" } },
-                { id: 7, blue: { text: "公義天平", icon: "⚖️" }, orange: { text: "誠實公平", icon: "🤝" } },
-                { id: 8, blue: { text: "閃耀冠冕", icon: "👑" }, orange: { text: "榮耀勝利", icon: "🌟" } },
-                { id: 9, blue: { text: "禱告的手", icon: "🙏" }, orange: { text: "悄悄話", icon: "💬" } },
-                { id: 10, blue: { text: "愛鄰舍", icon: "🌍" }, orange: { text: "幫助別人", icon: "🎁" } },
-                { id: 11, blue: { text: "活水泉源", icon: "💧" }, orange: { text: "上帝生命", icon: "🌱" } },
-                { id: 12, blue: { text: "堅固城牆", icon: "🧱" }, orange: { text: "平安記號", icon: "🏳️" } },
-                { id: 13, blue: { text: "清晨日光", icon: "🌅" }, orange: { text: "帶來希望", icon: "🌻" } },
-                { id: 14, blue: { text: "喜樂油", icon: "🏺" }, orange: { text: "代替悲傷", icon: "😊" } },
-                { id: 15, blue: { text: "新耶路撒冷", icon: "🏰" }, orange: { text: "永遠同住", icon: "👼" } }
-            ]
-        };
+        // 撒迦利亞書主題題庫 (至少15組，確保高級難度足夠使用)
+        const allCardData = [
+            { id: 1, icon: '🕯️', text: '純金燈臺' },
+            { id: 2, icon: '🌳', text: '兩棵橄欖樹' },
+            { id: 3, icon: '📜', text: '飛行的書卷' },
+            { id: 4, icon: '🐎', text: '四輛戰車' },
+            { id: 5, icon: '👑', text: '大祭司約書亞' },
+            { id: 6, icon: '🏛️', text: '所羅巴伯' },
+            { id: 7, icon: '📐', text: '準繩' },
+            { id: 8, icon: '🌊', text: '活水泉源' },
+            { id: 9, icon: '🎶', text: '錫安歡呼' },
+            { id: 10, icon: '🕊️', text: '和平君王' },
+            { id: 11, icon: '🦯', text: '榮美與聯索' },
+            { id: 12, icon: '🛡️', text: '萬軍之主' },
+            { id: 13, icon: '🏰', text: '復興耶路撒冷' },
+            { id: 14, icon: '👁️', text: '七眼監察' },
+            { id: 15, icon: '⚡', text: '不是倚靠勢力' }
+        ];
 
-        let currentMode = 10;
-        let moves = 0, timer = 0, flippedCards = [], matchedCount = 0;
-        let timerInterval = null;
-        let isChecking = false;
+        let hasFlippedCard = false;
+        let lockBoard = false; // 防連點鎖定機制
+        let firstCard, secondCard;
+        let moves = 0;
+        let matchedPairs = 0;
+        let totalPairs = 5;
+        let timer = null;
+        let seconds = 0;
+        let timerStarted = false;
 
-        function switchMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${mode}`).classList.add('active');
-            initGame();
+        const board = document.getElementById('game-board');
+        const movesDisplay = document.getElementById('moves-count');
+        const timerDisplay = document.getElementById('timer');
+
+        // 啟動或重置遊戲
+        function startGame(pairs, btnElement = null) {
+            totalPairs = pairs;
+            
+            // 處理按鈕 Active 狀態
+            if (btnElement) {
+                document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+
+            // 根據難度設定網格 CSS 類別
+            board.className = `game-board grid-${pairs}`;
+
+            // 重置所有遊戲變數與計時器
+            resetGameStats();
+
+            // 1. 從題庫取出所需數量的卡片
+            const selectedData = allCardData.slice(0, pairs);
+            
+            // 2. 複製一份成對 (這步驟保證絕對有可以湊成一對的牌)
+            const deck = [...selectedData, ...selectedData];
+
+            // 3. 使用嚴格的 Fisher-Yates 演算法洗牌
+            shuffleArray(deck);
+
+            // 4. 渲染到畫面上
+            renderBoard(deck);
         }
 
-        function initGame() {
-            clearInterval(timerInterval);
-            timer = 0;
-            moves = 0;
-            matchedCount = 0;
-            flippedCards = [];
-            isChecking = false;
-            document.getElementById('timer').innerText = timer;
-            document.getElementById('moves').innerText = moves;
+        // Fisher-Yates 洗牌演算法 (保證真正隨機且不遺漏)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
-            timerInterval = setInterval(() => { 
-                timer++; 
-                document.getElementById('timer').innerText = timer; 
-            }, 1000);
-
-            let pairs = gameModes[currentMode];
-            let gameData = [];
-
-            pairs.forEach(pair => {
-                gameData.push({ id: pair.id, text: pair.blue.text, icon: pair.blue.icon, type: "blue" });
-                gameData.push({ id: pair.id, text: pair.orange.text, icon: pair.orange.icon, type: "orange" });
-            });
-
-            // 隨機洗牌
-            gameData.sort(() => Math.random() - 0.5);
-
-            const grid = document.getElementById('gameGrid');
-            grid.className = `grid mode-${currentMode}`;
-            grid.innerHTML = '';
-
-            gameData.forEach(item => {
+        // 渲染卡片 HTML
+        function renderBoard(deck) {
+            board.innerHTML = '';
+            deck.forEach(item => {
                 const card = document.createElement('div');
-                card.className = `card ${item.type}`;
-                card.dataset.id = item.id;
+                card.classList.add('card');
+                card.dataset.id = item.id; // 綁定配對 ID
 
                 card.innerHTML = `
-                    <div class="card-back">?</div>
-                    <div class="card-front">
-                        <div class="icon">${item.icon}</div>
-                        <div>${item.text}</div>
+                    <div class="card-inner">
+                        <div class="card-back">?</div>
+                        <div class="card-front">
+                            <div class="icon">${item.icon}</div>
+                            <div class="text">${item.text}</div>
+                        </div>
                     </div>
                 `;
-                
-                card.addEventListener('click', function() {
-                    flipCard(this);
-                });
-                
-                grid.appendChild(card);
+
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
             });
         }
 
-        function flipCard(card) {
-            if (isChecking) return; 
-            if (card.classList.contains('flipped') || card.classList.contains('matched')) return; 
+        // 翻牌邏輯
+        function flipCard() {
+            // 如果版面鎖定中、或是點擊到已經翻開的同一張牌，忽略點擊
+            if (lockBoard) return;
+            if (this === firstCard) return;
+            if (this.classList.contains('matched')) return;
 
-            card.classList.add('flipped');
-            flippedCards.push(card);
-
-            if (flippedCards.length === 2) {
-                moves++;
-                document.getElementById('moves').innerText = moves;
-                checkMatch();
+            // 第一次點擊卡片時開始計時
+            if (!timerStarted) {
+                startTimer();
+                timerStarted = true;
             }
+
+            this.classList.add('flipped');
+
+            if (!hasFlippedCard) {
+                // 翻開第一張牌
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            // 翻開第二張牌
+            secondCard = this;
+            moves++;
+            movesDisplay.textContent = moves;
+
+            // 檢查是否配對成功
+            checkForMatch();
         }
 
-        function checkMatch() {
-            isChecking = true;
-            const [c1, c2] = flippedCards;
-            let totalCards = gameModes[currentMode].length * 2;
+        // 比對兩張牌
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.id === secondCard.dataset.id;
 
-            if (c1.dataset.id === c2.dataset.id) {
-                c1.classList.add('matched');
-                c2.classList.add('matched');
-                matchedCount += 2;
-                flippedCards = [];
-                isChecking = false;
-
-                if (matchedCount === totalCards) {
-                    clearInterval(timerInterval);
-                    setTimeout(() => {
-                        alert(`🎉 太棒了！挑戰成功！\n總共花費 ${timer} 秒，翻牌 ${moves} 次！`);
-                    }, 300);
-                }
+            if (isMatch) {
+                disableCards();
             } else {
-                setTimeout(() => {
-                    c1.classList.remove('flipped');
-                    c2.classList.remove('flipped');
-                    flippedCards = [];
-                    isChecking = false;
-                }, 1000);
+                unflipCards();
             }
         }
 
-        switchMode(10);
+        // 配對成功：標記為 matched，不移除 DOM，不隱藏，保留在版面上！
+        function disableCards() {
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+
+            // 移除點擊事件，避免重複點擊
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+
+            matchedPairs++;
+            resetBoard();
+
+            // 檢查是否全部配對完成
+            if (matchedPairs === totalPairs) {
+                clearInterval(timer);
+                setTimeout(() => {
+                    alert(`🎉 恭喜通關「撒迦利亞書冒險挑戰」！\n\n總共花費：${moves} 次\n總計時間：${seconds} 秒`);
+                }, 400);
+            }
+        }
+
+        // 配對失敗：1秒後自動蓋上
+        function unflipCards() {
+            lockBoard = true; // 鎖定版面，避免玩家在記憶期間亂點導致程式邏輯衝突
+
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                resetBoard();
+            }, 1000);
+        }
+
+        // 重置回合暫存變數
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        // 重置統計與計時器
+        function resetGameStats() {
+            clearInterval(timer);
+            timer = null;
+            seconds = 0;
+            moves = 0;
+            matchedPairs = 0;
+            timerStarted = false;
+            movesDisplay.textContent = '0';
+            timerDisplay.textContent = '0';
+            resetBoard();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                seconds++;
+                timerDisplay.textContent = seconds;
+            }, 1000);
+        }
+
+        // 網頁載入時，預設啟動簡單模式 (5對)
+        window.addEventListener('DOMContentLoaded', () => {
+            startGame(5);
+        });
     </script>
 </body>
 </html>
