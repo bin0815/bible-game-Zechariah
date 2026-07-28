@@ -16,7 +16,7 @@ HTML
             display: flex;
             flex-direction: column;
             height: 100vh;
-            overflow: hidden; /* 鎖定畫面，避免平板或電腦出現捲軸 */
+            overflow: hidden; 
         }
         h1 { margin: 5px 0; color: #2c3e50; font-size: 1.5rem; }
         .menu { margin-bottom: 8px; }
@@ -24,7 +24,6 @@ HTML
         .menu button.active { background-color: #2980b9; font-weight: bold; }
         .stats { font-size: 1rem; margin-bottom: 8px; font-weight: bold; color: #34495e; }
         
-        /* 網格自適應：確保無論 10、20、30 張都能完美塞在同一畫面 */
         .grid { 
             display: grid; 
             gap: 8px; 
@@ -37,10 +36,10 @@ HTML
             justify-content: center;
         }
         
-        /* 依據不同難易度動態調整排版與卡片大小 */
-        .grid.mode-10 { grid-template-columns: repeat(5, minmax(0, 1fr)); } /* 5x2 */
-        .grid.mode-20 { grid-template-columns: repeat(5, minmax(0, 1fr)); } /* 5x4 */
-        .grid.mode-30 { grid-template-columns: repeat(6, minmax(0, 1fr)); } /* 6x5 */
+        /* 依據不同難易度動態調整排版：10張(5x2), 20張(5x4), 30張(6x5) */
+        .grid.mode-10 { grid-template-columns: repeat(5, minmax(0, 1fr)); } 
+        .grid.mode-20 { grid-template-columns: repeat(5, minmax(0, 1fr)); } 
+        .grid.mode-30 { grid-template-columns: repeat(6, minmax(0, 1fr)); } 
 
         .card { 
             background-color: #4a90e2; 
@@ -55,7 +54,7 @@ HTML
             font-weight: bold; 
             box-shadow: 0 3px 5px rgba(0,0,0,0.15); 
             user-select: none; 
-            aspect-ratio: 1; /* 保持正方形卡片 */
+            aspect-ratio: 1; 
             padding: 4px;
         }
         .card.flipped { background-color: white; color: #333; transform: none; }
@@ -79,6 +78,7 @@ HTML
     <div class="grid" id="gameGrid"></div>
 
     <script>
+        // 總共 15 組完整資料
         const allPairs = [
             { id: 1, blue: { text: "騎驢的王", icon: "👑" }, orange: { text: "謙卑和平的耶穌", icon: "🕊️" } },
             { id: 2, blue: { text: "金燈臺", icon: "💡" }, orange: { text: "聖靈帶領的光", icon: "✨" } },
@@ -124,21 +124,22 @@ HTML
                 document.getElementById('timer').innerText = timer; 
             }, 1000);
 
-            // 決定要取幾組（例如 10 張 = 5 組，每組包含一張藍卡與一張橘卡）
+            // 嚴格計算：10張=取5組，20張=取10組，30張=取15組
             let pairCount = currentCardCount / 2;
             let selectedPairs = allPairs.slice(0, pairCount);
             
             let gameData = [];
             selectedPairs.forEach(pair => {
+                // 每組強制放入一張藍卡、一張橘卡，確保一定找得到對應
                 gameData.push({ id: pair.id, text: pair.blue.text, icon: pair.blue.icon, type: "blue" });
                 gameData.push({ id: pair.id, text: pair.orange.text, icon: pair.orange.icon, type: "orange" });
             });
 
-            // 洗牌
+            // 隨機洗牌
             gameData.sort(() => Math.random() - 0.5);
 
             const grid = document.getElementById('gameGrid');
-            grid.className = `grid mode-${currentCardCount}`; // 動態切換網格排版樣式
+            grid.className = `grid mode-${currentCardCount}`;
             grid.innerHTML = '';
 
             gameData.forEach(item => {
@@ -173,8 +174,10 @@ HTML
             isChecking = true;
             const [c1, c2] = flippedCards;
 
+            // 必須 ID 相同，且一張是藍卡、一張是橘卡才算成功配對
             if (c1.dataset.id === c2.dataset.id && c1.dataset.type !== c2.dataset.type) {
-                // 正確配對：必須 id 相同，且一張是藍卡、一張是橘卡
+                c1.classList.add('matched');
+                c2.classList.add('matched');
                 matchedCount += 2;
                 flippedCards = [];
                 isChecking = false;
@@ -186,7 +189,7 @@ HTML
                     }, 300);
                 }
             } else {
-                // 配對失敗或同色相撞，1秒後自動蓋回
+                // 配對失敗，1秒後自動蓋回
                 setTimeout(() => {
                     c1.classList.remove('flipped', 'blue', 'orange'); 
                     c1.innerHTML = '<span>?</span>';
@@ -198,6 +201,7 @@ HTML
             }
         }
 
+        // 預設載入時選中 10 張
         setDifficulty(10);
     </script>
 </body>
